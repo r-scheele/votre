@@ -11,4 +11,4 @@ set_router(app)
 
 @app.get(path="/")
 def root():
-    return {"message": "Hello World!"}
+    return {"message": "Hello World!!"}

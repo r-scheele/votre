@@ -1,4 +1,5 @@
-from app.routers import posts, users, auth
+from app.routers import posts, users
+from app.routers.auth import auth
 
 
 def set_router(app):
