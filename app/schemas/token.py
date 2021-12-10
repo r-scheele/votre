@@ -11,4 +11,4 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     user_id: Optional[int] = None
     role: str
-    is_active: bool
+    is_active: bool = True

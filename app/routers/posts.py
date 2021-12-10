@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from fastapi import Depends, HTTPException, APIRouter, Request
+from fastapi import Depends, HTTPException, APIRouter
 from sqlalchemy.orm import Session
 from starlette import status
 
@@ -25,20 +25,20 @@ def get_post(post_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/", response_model=List[PostSchema])
-def get_posts(db: Session = Depends(get_db)):
-    posts = db.query(Post).all()
+def get_my_posts(db: Session = Depends(get_db), user=Depends(get_current_user)):
+    posts = db.query(Post).filter_by(user_id=user.user_id).all()
     return posts
 
 
+# @router.get(path="/all", response_model=List[PostSchema])
+# def get_posts(db: Session = Depends(get_db), user=Depends(get_current_user)):
+#     posts = db.query(Post).all()
+#     return posts
+
+
 @router.post(path="/", status_code=status.HTTP_201_CREATED, response_model=PostSchema)
-def create_post(
-        post: PostCreate,
-        request: Request,
-        db: Session = Depends(get_db),
-        user: dict = Depends(get_current_user)
-):
-    print(request.headers)
-    post = Post(**post.dict())
+def create_post(post: PostCreate, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    post = Post(user_id=user.user_id, **post.dict())
     db.add(post)
     db.commit()
     db.refresh(post)

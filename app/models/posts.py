@@ -13,4 +13,4 @@ class Post(Base):
     content = Column(String(140), index=True, nullable=False)
     published = Column(Boolean, server_default=expression.true(), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
-#    user_id = Column(Integer, ForeignKey('users.id'))
+    user_id = Column(Integer, ForeignKey('users.id'))

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 from fastapi import HTTPException, Depends
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, APIKeyCookie
 from jose import JWTError, jwt
 from starlette import status
 
@@ -12,20 +12,23 @@ SECRET_KEY = "@Habeebullah01"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+cookie_handler = APIKeyCookie(name="session")
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(token: str = Depends(cookie_handler or oauth2_scheme),
+                           ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    return verify_access_token(token, credentials_exception)
+
+    return verify_access_token(credentials_exception, token=token)
 
 
-async def verify_access_token(token: str, credentials_exception: HTTPException):
+def verify_access_token(credentials_exception: HTTPException, token: str):
     try:
-        payload = await jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("user_id")
         role: str = payload.get("user_id")
         is_active: str = payload.get("is_active")
