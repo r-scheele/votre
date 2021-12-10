@@ -4,8 +4,11 @@ from typing import Optional
 from fastapi import HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer, APIKeyCookie
 from jose import JWTError, jwt
+from sqlalchemy.orm import Session
 from starlette import status
 
+from app.config.database import get_db
+from app.models.users import User
 from app.schemas.token import TokenData
 
 SECRET_KEY = "@Habeebullah01"
@@ -15,16 +18,16 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 cookie_handler = APIKeyCookie(name="session")
 
 
-async def get_current_user(token: str = Depends(cookie_handler or oauth2_scheme),
-                           ):
+async def get_current_user(token: str = Depends(cookie_handler or oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    return verify_access_token(credentials_exception, token=token)
-
+    token = verify_access_token(credentials_exception, token=token)
+    user = db.query(User).filter(User.id == token.user_id).first()
+    return user
 
 def verify_access_token(credentials_exception: HTTPException, token: str):
     try:

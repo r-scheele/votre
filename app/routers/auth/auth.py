@@ -5,7 +5,7 @@ from starlette import status
 
 from app.models.users import User
 from app.config.database import get_db
-from app.schemas.users import UserCreate
+from app.schemas.user import UserCreate
 from app.utils.oauth2 import create_access_token
 from app.utils.utils import verify_password
 

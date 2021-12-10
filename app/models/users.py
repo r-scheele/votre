@@ -14,4 +14,4 @@ class User(Base):
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
     is_active = Column(Boolean, server_default=expression.true(), nullable=False)
     role = Column(String(128), nullable=False, server_default="user")
-    posts = relationship('Post', backref='author', lazy='dynamic')
+    posts = relationship('Post')
