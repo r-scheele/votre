@@ -14,5 +14,5 @@ class Post(Base):
     content = Column(String(140), index=True, nullable=False)
     published = Column(Boolean, server_default=expression.true(), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
-    user_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
-    owner = relationship('User', backref='owner_posts', foreign_keys=[user_id])
+    owner_id = Column(Integer, ForeignKey('users.id'))
+    owner = relationship('User', backref='posts_owner', cascade="all,delete", foreign_keys=[owner_id])

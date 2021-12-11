@@ -22,8 +22,12 @@ router = APIRouter(
 @router.get("/", response_model=List[UserOut])
 def get_all_users(db: Session = Depends(get_db), current_user=Depends(get_current_user),
                   limit: int = 10, skip: int = 0, search: Optional[str] = ""):
-    users = db.query(User).order_by(desc(User.created_at)).filter(Post.title.contains(search)).\
-        limit(limit=limit).offset(offset=skip).all()
+    if current_user is None:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Action not authorized, please login and try again")
+    else:
+        users = db.query(User).order_by(desc(User.created_at)).filter(Post.title.contains(search)).\
+            limit(limit=limit).offset(offset=skip).all()
     return users
 
 
@@ -49,6 +53,10 @@ def get_a_user(user_id: int, db: Session = Depends(get_db), current_user=Depends
 
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id {user_id} is not found")
+    if current_user is None:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Action not authorized, please login and try again")
+
     return user
 
 

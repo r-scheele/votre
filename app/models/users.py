@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, text, Boolean
+from sqlalchemy import Column, Integer, String, text, Boolean, ForeignKey
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import expression
@@ -16,4 +16,4 @@ class User(Base):
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
     is_active = Column(Boolean, server_default=expression.true(), nullable=False)
     role = Column(String(128), nullable=False, server_default="user")
-    posts = relationship('Post', overlaps="owner,owner_posts")
+    posts = relationship('Post', back_populates="owner", cascade_backrefs=True, overlaps="posts_owner")

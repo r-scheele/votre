@@ -23,16 +23,23 @@ def get_a_post(post_id: int, db: Session = Depends(get_db), current_user=Depends
 
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id {post_id} is not found")
+    if current_user is None:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Action not authorized, please login and try again")
 
     return post
 
 
 @router.post(path="/", status_code=status.HTTP_201_CREATED, response_model=PostOut)
 def create_a_post(post: PostCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    post = Post(user_id=current_user.id, **post.dict())
-    db.add(post)
-    db.commit()
-    db.refresh(post)
+    if current_user is None:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Action not authorized, please login and try again")
+    else:
+        post = Post(owner_id=current_user.id, **post.dict())
+        db.add(post)
+        db.commit()
+        db.refresh(post)
     return post
 
 
@@ -59,7 +66,7 @@ def delete_a_post(post_id: int, db: Session = Depends(get_db), current_user=Depe
 
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id {post_id} is not found")
-    if post.user_id != current_user.id:
+    if post.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Action not authorized")
 
     db.delete(post)
@@ -71,8 +78,12 @@ def get_posts(db: Session = Depends(get_db),
               current_user=Depends(get_current_user),
               limit: int = 10, skip: int = 0,
               search: Optional[str] = ""):
-    posts = db.query(Post).order_by(desc(Post.created_at)).filter(Post.title.contains(search)).\
-        limit(limit=limit).offset(offset=skip).all()
+    if current_user is None:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Action not authorized, please login and try again")
+    else:
+        posts = db.query(Post).order_by(desc(Post.created_at)).filter(Post.title.contains(search)). \
+            limit(limit=limit).offset(offset=skip).all()
     return posts
 
 
@@ -82,8 +93,11 @@ def get_posts_from_a_user(user_id: int,
                           current_user=Depends(get_current_user),
                           limit: int = 10, skip: int = 0,
                           search: Optional[str] = ""):
-
-    posts = db.query(Post).filter(Post.user_id == user_id).filter(Post.title.contains(search)).\
-        order_by(desc(Post.created_at)).limit(limit=limit).offset(offset=skip).all()
+    if current_user is None:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Action not authorized, please login and try again")
+    else:
+        posts = db.query(Post).filter(Post.owner_id == user_id).filter(Post.title.contains(search)). \
+            order_by(desc(Post.created_at)).limit(limit=limit).offset(offset=skip).all()
 
     return posts
