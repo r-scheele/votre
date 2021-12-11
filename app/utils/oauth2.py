@@ -10,12 +10,11 @@ from starlette import status
 from app.config.database import get_db
 from app.models.users import User
 from app.schemas.token import TokenData
+from app.utils.utils import get_settings
 
-SECRET_KEY = "@Habeebullah01"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 cookie_handler = APIKeyCookie(name="session")
+settings = get_settings()
 
 
 async def get_current_user(token: str = Depends(cookie_handler or oauth2_scheme), db: Session = Depends(get_db)):
@@ -29,9 +28,10 @@ async def get_current_user(token: str = Depends(cookie_handler or oauth2_scheme)
     user = db.query(User).filter(User.id == token.user_id).first()
     return user
 
+
 def verify_access_token(credentials_exception: HTTPException, token: str):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
         user_id: str = payload.get("user_id")
         role: str = payload.get("user_id")
         is_active: str = payload.get("is_active")
@@ -50,7 +50,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.utcnow() + timedelta(minutes=settings.access_token_expires_min)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
     return encoded_jwt
