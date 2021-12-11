@@ -1,6 +1,7 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import HTTPException, Depends, APIRouter
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 from starlette import status
 
@@ -19,8 +20,10 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[UserOut])
-def get_all_users(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    users = db.query(User).all()
+def get_all_users(db: Session = Depends(get_db), current_user=Depends(get_current_user),
+                  limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    users = db.query(User).order_by(desc(User.created_at)).filter(Post.title.contains(search)).\
+        limit(limit=limit).offset(offset=skip).all()
     return users
 
 
@@ -63,7 +66,7 @@ def delete_a_user(user_id: int, db: Session = Depends(get_db), current_user=Depe
 
 
 @router.put(path="/{user_id}", response_model=UserOut)
-def update_a_post(user_id: int, user: UserCreate, db: Session = Depends(get_db),
+def update_a_user(user_id: int, user: UserCreate, db: Session = Depends(get_db),
                   current_user=Depends(get_current_user)):
     previous_user_query = db.query(User).filter(User.id == user_id)
     previous_user = previous_user_query.first()

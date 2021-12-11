@@ -6,6 +6,8 @@ from sqlalchemy.sql import expression
 from app.config.database import Base
 
 
+# implement search functionality when username is added to the model
+
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True, nullable=False)
@@ -14,4 +16,4 @@ class User(Base):
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
     is_active = Column(Boolean, server_default=expression.true(), nullable=False)
     role = Column(String(128), nullable=False, server_default="user")
-    posts = relationship('Post')
+    posts = relationship('Post', overlaps="owner,owner_posts")

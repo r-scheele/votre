@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from fastapi import Depends, HTTPException, APIRouter
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 from starlette import status
 
@@ -66,12 +67,23 @@ def delete_a_post(post_id: int, db: Session = Depends(get_db), current_user=Depe
 
 
 @router.get(path="/", response_model=List[PostOut])
-def get_posts(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    posts = db.query(Post).all()
+def get_posts(db: Session = Depends(get_db),
+              current_user=Depends(get_current_user),
+              limit: int = 10, skip: int = 0,
+              search: Optional[str] = ""):
+    posts = db.query(Post).order_by(desc(Post.created_at)).filter(Post.title.contains(search)).\
+        limit(limit=limit).offset(offset=skip).all()
     return posts
 
 
 @router.get(path="/all/{user_id}", response_model=List[PostOut])
-def get_posts_from_a_user(user_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    posts = db.query(Post).filter(Post.user_id == user_id).all()
+def get_posts_from_a_user(user_id: int,
+                          db: Session = Depends(get_db),
+                          current_user=Depends(get_current_user),
+                          limit: int = 10, skip: int = 0,
+                          search: Optional[str] = ""):
+
+    posts = db.query(Post).filter(Post.user_id == user_id).filter(Post.title.contains(search)).\
+        order_by(desc(Post.created_at)).limit(limit=limit).offset(offset=skip).all()
+
     return posts
