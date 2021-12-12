@@ -11,4 +11,4 @@ set_router(app)
 
 @app.get(path="/")
 def root():
-    return {"message": "send a  request to /docs to get access to the swaggerUI documentation😁 cheers!"}
+    return {"message": "send a request to /docs to get access to the swaggerUI documentation😁 cheers!"}
