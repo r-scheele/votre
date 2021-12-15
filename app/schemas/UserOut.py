@@ -5,4 +5,5 @@ from app.schemas.user import UserSchema
 
 
 class UserOut(UserSchema):
-    posts: Optional[List[PostSchema]] = []
+    pass
+    # posts: Optional[List[PostSchema]] = []

@@ -7,6 +7,7 @@ from starlette import status
 
 from app.config.database import get_db
 from app.models.posts import Post
+from app.models.users import User
 from app.schemas.PostOut import PostOut
 from app.schemas.post import PostSchema, PostCreate
 from app.utils.oauth2 import get_current_user
@@ -36,7 +37,8 @@ def create_a_post(post: PostCreate, db: Session = Depends(get_db), current_user=
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail=f"Action not authorized, please login and try again")
     else:
-        post = Post(owner_id=current_user.id, **post.dict())
+        user = db.query(User).filter(User.id == current_user.id).first()
+        post = Post(owner_id=current_user.id, owner=user, **post.dict())
         db.add(post)
         db.commit()
         db.refresh(post)

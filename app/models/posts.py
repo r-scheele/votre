@@ -15,7 +15,7 @@ class Post(Base):
     published = Column(Boolean, server_default=expression.true(), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
     owner_id = Column(Integer, ForeignKey('users.id'))
-
+    owner = relationship('User', backref='posts_owner', cascade="all,delete", foreign_keys=[owner_id])
     comments = relationship('Comment', backref='author', lazy='dynamic',
                             primaryjoin="Post.id == Comment.post_id")
     likes = relationship('Like', backref='author', lazy='dynamic',
