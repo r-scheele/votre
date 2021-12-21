@@ -29,7 +29,6 @@ def like_post(like: LikeSchema, db: Session = Depends(get_db), current_user=Depe
     post = db.query(Post).filter(Post.id == like.post_id).first()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id {like.post_id} does not exist")
-
     like_query = db.query(Like).filter(Like.post_id == like.post_id, Like.owner_id == current_user.id)
     found_like = like_query.first()
 
@@ -37,7 +36,7 @@ def like_post(like: LikeSchema, db: Session = Depends(get_db), current_user=Depe
         if found_like:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"User with id {current_user.id}"
                                                                              f" has already like {like.post_id}")
-        new_like = Like(post_id=like.post_id, owner_id=current_user.id)
+        new_like = Like(owner_id=current_user.id, post_id=like.post_id)
         db.add(new_like)
         db.commit()
         return {

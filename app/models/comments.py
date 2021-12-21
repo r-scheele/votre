@@ -18,12 +18,10 @@ class Comment(Base):
     disabled = Column(Boolean)
     created_at = Column(DateTime(), default=datetime.utcnow, index=True)
     path = Column(Text, index=True)
-    parent_id = Column(Integer, ForeignKey('comment.id'))
+    parent_id = Column(Integer, ForeignKey('comments.id'))
     replies = relationship(
         'Comment', backref=backref('parent', remote_side=[id]),
         lazy='dynamic')
-    likes = relationship('Like', backref='author', lazy='dynamic',
-                         primaryjoin="Comment.id == Like.post_id")
 
     def save(self, db):
         db.add(self)

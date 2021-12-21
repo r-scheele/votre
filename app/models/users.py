@@ -17,11 +17,7 @@ class User(Base):
     is_active = Column(Boolean, server_default=expression.true(), nullable=False)
     role = Column(String(128), nullable=False, server_default="user")
 
-    posts = relationship('Post', backref='post_author', lazy='dynamic',
+    posts = relationship('Post', backref='post_author', lazy='dynamic', overlaps="owner,posts_owner",
                          primaryjoin="User.id == Post.owner_id")
-    post_likes = relationship('Like', backref='post_likes_author', lazy='dynamic',
-                              primaryjoin="User.id == Like.owner_id")
     comments = relationship('Comment', backref='comment_author', lazy='dynamic',
                             primaryjoin="User.id == Comment.owner_id")
-    comment_likes = relationship('CommentLike', backref='comment_likes_author', lazy='dynamic',
-                                 primaryjoin="User.id == CommentLike.owner_id")
