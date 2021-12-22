@@ -7,8 +7,13 @@ from alembic import context
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
-from app.config.alembic_setting import bases
+
 from app.config.database import SQLALCHEMY_DATABASE_URL
+from app.config.database import Base
+from app.models.users import User
+from app.models.posts import Post
+from app.models.comments import Comment
+from app.models.likes import Like
 
 config = context.config
 config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
@@ -21,7 +26,7 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = bases
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
