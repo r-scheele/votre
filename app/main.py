@@ -24,5 +24,4 @@ app.add_middleware(
 
 @app.get(path="/")
 def root():
-    return {"message": "send request to votres/herokuapp.com/docs to get access to the swaggerUI documentation😁 "
-                       "cheers!"}
+    return "send request to votres/herokuapp.com/docs to get access to the swaggerUI documentation 😁 cheers!"
