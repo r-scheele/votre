@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.config.database import engine, Base
 from app.routers.router import set_router
 
 # commented it, since i'm now using Alembic for migration
@@ -24,5 +23,5 @@ app.add_middleware(
 
 @app.get(path="/")
 def root():
-    return "send request to https://votres/herokuapp.com/docs to access to the documentation 😁cheers! - " \
+    return "send request to https://votres.herokuapp.com/docs to access to the documentation 😁cheers! - " \
            "rsc👩‍💻 "

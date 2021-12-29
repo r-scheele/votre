@@ -1,10 +1,7 @@
-from fastapi.testclient import TestClient
-from app.main import app
-
-client = TestClient(app=app)
+from tests.config.fixtures import client, session
 
 
-def test_root():
+def test_root(client):
     response = client.get("/")
 
     assert response.status_code == 200
