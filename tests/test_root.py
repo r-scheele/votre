@@ -1,5 +1,3 @@
-from tests.config.fixtures import client, session
-
 
 def test_root(client):
     response = client.get("/")

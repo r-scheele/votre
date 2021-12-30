@@ -29,6 +29,9 @@ def login(response: Response, user_body: OAuth2PasswordRequestForm = Depends(), 
             "role": user.role,
             "is_active": user.is_active
         })
+
+    # you can set headers like it was done in the fixtures, No? let's see
+
     response.set_cookie("session", token_in_session)
     return {
         "access_token": token_in_session,

@@ -22,7 +22,7 @@ router = APIRouter(
 @router.get(path="/{post_id}", response_model=PostOut)
 def get_a_post(post_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     post = db.query(Post, func.count(Like.post_id).label("likes")) \
-            .join(Like, Like.post_id == Post.id, isouter=True).group_by(Post.id).filter(Post.id == post_id).first()
+        .join(Like, Like.post_id == Post.id, isouter=True).group_by(Post.id).filter(Post.id == post_id).first()
 
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id {post_id} is not found")
@@ -33,7 +33,7 @@ def get_a_post(post_id: int, db: Session = Depends(get_db), current_user=Depends
     return post
 
 
-@router.post(path="/", status_code=status.HTTP_201_CREATED, response_model=PostOut)
+@router.post(path="/", status_code=status.HTTP_201_CREATED, response_model=Posts)
 def create_a_post(post: PostCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     if current_user is None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
@@ -78,33 +78,34 @@ def delete_a_post(post_id: int, db: Session = Depends(get_db), current_user=Depe
 
 @router.get(path="/", response_model=List[PostOut])
 # @router.get(path="/")
-def get_posts(db: Session = Depends(get_db),
-              current_user=Depends(get_current_user),
-              limit: int = 10, skip: int = 0,
-              search: Optional[str] = ""):
+def get_all_posts(db: Session = Depends(get_db),
+                  current_user=Depends(get_current_user),
+                  limit: int = 10, skip: int = 0,
+                  search: Optional[str] = ""):
     if current_user is None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail=f"Action not authorized, please login and try again")
     else:
         posts = db.query(Post, func.count(Like.post_id).label("likes")) \
             .join(Like, Like.post_id == Post.id, isouter=True).group_by(Post.id).filter(Post.title.contains(search)). \
-            limit(limit=limit).offset(offset=skip).all()
+            order_by(desc(Post.created_at)).limit(limit=limit).offset(offset=skip).all()
 
     return posts
 
 
 @router.get(path="/all/{user_id}", response_model=List[PostOut])
-def get_posts_from_a_user(user_id: int,
-                          db: Session = Depends(get_db),
-                          current_user=Depends(get_current_user),
-                          limit: int = 10, skip: int = 0,
-                          search: Optional[str] = ""):
+def get_all_posts_from_a_user(user_id: int,
+                              db: Session = Depends(get_db),
+                              current_user=Depends(get_current_user),
+                              limit: int = 10, skip: int = 0,
+                              search: Optional[str] = ""):
     if current_user is None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail=f"Action not authorized, please login and try again")
     else:
         posts = db.query(Post, func.count(Like.post_id).label("likes")) \
-            .join(Like, Like.post_id == Post.id, isouter=True).group_by(Post.id).filter(Post.owner_id == user_id).filter(Post.title.contains(search)). \
+            .join(Like, Like.post_id == Post.id, isouter=True).group_by(Post.id).filter(
+            Post.owner_id == user_id).filter(Post.title.contains(search)). \
             order_by(desc(Post.created_at)).limit(limit=limit).offset(offset=skip).all()
 
     return posts
