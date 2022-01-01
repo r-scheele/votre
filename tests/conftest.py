@@ -55,6 +55,19 @@ def test_create_user_before_login(client) -> dict:
 
 
 @pytest.fixture
+def test_create_second_user_before_login(client) -> dict:
+    body = {
+        "email": "user2@example.com",
+        "password": "string"
+    }
+    response = client.post(url="/users/", json=body)
+    assert response.status_code == 201
+    new_user = response.json()
+    new_user["password"] = body["password"]
+    return new_user
+
+
+@pytest.fixture
 def token(test_create_user_before_login) -> str:
     token = create_access_token(
         data={
@@ -67,6 +80,12 @@ def token(test_create_user_before_login) -> str:
 
 @pytest.fixture
 def authorized_client(client, token) -> TestClient:
+    """
+    :param client:
+    :param token:
+    :return: the first test user:
+    """
+
     # set headers in client
     client.headers = {
         **client.headers,
@@ -78,7 +97,7 @@ def authorized_client(client, token) -> TestClient:
 
 
 @pytest.fixture
-def test_posts(test_create_user_before_login, session):
+def test_posts(test_create_user_before_login, session, test_create_second_user_before_login):
     posts = [
         {
             "title": "first title",
@@ -94,6 +113,11 @@ def test_posts(test_create_user_before_login, session):
             "title": "third title",
             "content": "third content",
             "owner_id": test_create_user_before_login["id"]
+        },
+        {
+            "title": "third title",
+            "content": "third content",
+            "owner_id": test_create_second_user_before_login["id"]
         }
     ]
     post_models = list(map(lambda post: Post(**post), posts))
